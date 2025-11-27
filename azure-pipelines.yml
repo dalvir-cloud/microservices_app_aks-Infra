@@ -1,0 +1,60 @@
+trigger: none
+pool: Default
+stages:
+- stage: terraforinitandplan
+  displayName: terraform init and plan
+  jobs:
+  - job: terraforminitplan
+    displayName: terraform init and plan
+    steps:
+     - task: TerraformTask@5
+       inputs:
+         provider: 'azurerm'
+         command: 'init'
+         workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+         backendServiceArm: 'Azure subscription 1'
+         backendAzureRmResourceGroupName: 'AgentRg'
+         backendAzureRmStorageAccountName: 'asvaccount123'
+         backendAzureRmContainerName: 'buscontainer'
+         backendAzureRmKey: 'terraform.tfstate'
+     - task: TerraformTask@5
+       inputs:
+         provider: 'azurerm'
+         command: 'plan'
+         workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+         environmentServiceNameAzureRM: 'Azure subscription 1'
+- stage: manualvalidation
+  dependsOn: terraforinitandplan
+  displayName: manual validation
+  pool: server
+  jobs:
+  - job: manualvalidation
+    displayName: manual validation
+    steps:
+    - task: ManualValidation@1
+      inputs:
+        instructions: 'ok'
+- stage: terraforminitapply
+  dependsOn: manualvalidation
+  displayName: terraform init and apply
+  jobs:
+  - job: terrafprmapply
+    displayName: terraform apply
+    steps:
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+        backendServiceArm: 'Azure subscription 1'
+        backendAzureRmResourceGroupName: 'AgentRg'
+        backendAzureRmStorageAccountName: 'asvaccount123'
+        backendAzureRmContainerName: 'buscontainer'
+        backendAzureRmKey: 'terraform.tfstate'
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/environments/dev'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'Azure subscription 1'
