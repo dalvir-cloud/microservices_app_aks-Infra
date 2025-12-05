@@ -1,0 +1,12 @@
+name: infra_deploy
+on: workflow_dispatch
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  terraform_init:
+    name:  terraform init
+    runs-on: self-hosted
+    steps:
+    
+    - run: echo Hello world!
