@@ -4,9 +4,28 @@ permissions:
   id-token: write
   contents: read
 jobs:
-  terraform_init:
-    name:  terraform init
+  terraform_initandplan:
+    name:  terraform init and plan
     runs-on: self-hosted
     steps:
-    
-    - run: echo Hello world!
+    - name: Checkout
+      uses: actions/checkout@v6.0.1
+      
+    - name: Terraform Init
+      id: init
+      run: terraform init -input=false  
+      
+    - name: Terraform fmt
+      id: fmt
+      run: terraform fmt -check
+      continue-on-error: true
+      
+    - name: Terraform Validate
+      id: validate
+      run: terraform validate -no-color
+
+    - name: Terraform Plan
+      id: plan
+      run: terraform plan -no-color -input=false
+      continue-on-error: true
+
