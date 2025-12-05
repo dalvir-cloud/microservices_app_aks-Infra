@@ -14,15 +14,18 @@ jobs:
     - name: Terraform Init
       id: init
       run: terraform init -input=false  
+      working-directory: environment/dev
       
     - name: Terraform fmt
       id: fmt
       run: terraform fmt -check
       continue-on-error: true
+      working-directory: environment/dev
       
     - name: Terraform Validate
       id: validate
       run: terraform validate -no-color
+      working-directory: environment/dev
 
     - name: Terraform Plan
       id: plan
