@@ -1,11 +1,13 @@
 name: infra_deploy
 on: workflow_dispatch
+
 permissions:
   id-token: write
   contents: read
+
 jobs:
   terraform_initandplan:
-    name:  terraform init and plan
+    name: terraform init and plan
     runs-on: self-hosted
     steps:
     - name: Checkout
@@ -18,10 +20,9 @@ jobs:
         tenant-id: 90c2d389-705b-4327-885c-ab24afe7aa51
         subscription-id: 77312bdf-fff4-4e77-9d06-5e69870a682c
 
-      
     - name: Terraform Init
       id: init
-      run: terraform init -input=false  
+      run: terraform init -input=false
       working-directory: environments/dev
       
     - name: Terraform fmt
@@ -41,13 +42,39 @@ jobs:
       continue-on-error: true
       working-directory: environments/dev
 
-  terraform_initandapply:
-    name:  terraform init and apply
+  # terraform_initandapply:
+  #   name: terraform init and apply
+  #   runs-on: self-hosted
+  #   needs: terraform_initandplan
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v6.0.1
+     
+  #   - name: Azure login
+  #     uses: azure/login@v2
+  #     with:
+  #       client-id: b1da5deb-01fc-4477-b34d-8a8fbbc81eae
+  #       tenant-id: 90c2d389-705b-4327-885c-ab24afe7aa51
+  #       subscription-id: 77312bdf-fff4-4e77-9d06-5e69870a682c
+
+  #   - name: Terraform Init
+  #     id: init
+  #     run: terraform init -input=false
+  #     working-directory: environments/dev
+
+  #   - name: Terraform Apply
+  #     id: apply
+  #     run: terraform apply -auto-approve
+  #     working-directory: environments/dev
+
+  terraform_destroy:
+    name: terraform destroy
     runs-on: self-hosted
+    needs: terraform_initandapply   # ensures apply happens before destroy
     steps:
     - name: Checkout
       uses: actions/checkout@v6.0.1
-     
+
     - name: Azure login
       uses: azure/login@v2
       with:
@@ -55,15 +82,11 @@ jobs:
         tenant-id: 90c2d389-705b-4327-885c-ab24afe7aa51
         subscription-id: 77312bdf-fff4-4e77-9d06-5e69870a682c
 
-      
     - name: Terraform Init
-      id: init
-      run: terraform init -input=false  
+      run: terraform init -input=false
       working-directory: environments/dev
 
-    - name: terraform apply
-      id: apply
-      run: terraform apply -auto-approve
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
       working-directory: environments/dev
-      
-      
+
