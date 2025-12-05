@@ -5,6 +5,12 @@ terraform {
       version = "4.54.0"
     }
   }
+backend "azurerm" {
+resource_group_name = "veersingh_rg"
+storage_account_name = "veerstg1"
+container_name = "veerblob"
+key = "terraform.tfstate"
+}
 }
 
 provider "azurerm" {
